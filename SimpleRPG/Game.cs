@@ -8,8 +8,12 @@ namespace SimpleRPG
 {
     class Game
     {
+        //player stats
         string playerName = "";
+        int playerMaxHealth = 100;
         int playerHealth = 100;
+        int playerDamage = 10;
+        int playerHealing = 25;
 
         public void Start()
         {
@@ -24,7 +28,7 @@ namespace SimpleRPG
             while (alive && monstersRemaining > 0)
             {
                 Console.WriteLine("There are " + monstersRemaining + " monsters remaining.");
-                alive = Encounter(20);
+                alive = Encounter(20, 20);
                 monstersRemaining--;
             }
 
@@ -41,54 +45,134 @@ namespace SimpleRPG
             Console.WriteLine("Welcome, " + playerName + ".");
         }
 
-        bool Encounter(int monsterDamage)
+        bool Encounter(int monsterHealth, int monsterDamage)
         {
             //Monster encounter!
-             Console.WriteLine("");
+            Console.WriteLine("");
             Console.WriteLine("A monster approaches!");
 
             //Player actions
             string action = "";
-            Console.Write("What will you do? (Fight/Flee) ");
-            action = Console.ReadLine();
+            bool survive = true;
+
 
             //Loop
-            for (int count = 0;
-                count < 1;)
-                if (action == "Fight" || action == "fight")
+            while (playerHealth > 0 && monsterHealth > 0)
             {
-                //monster attack
-                Console.WriteLine("The monster attacks " + playerName + " takes " + monsterDamage + " damage!");
-                playerHealth = playerHealth - monsterDamage;
-                Console.WriteLine(playerName + " Has " + playerHealth + " points of health remaining.");
-
-                if (playerHealth <= 0)
+                Console.Write("What will you do? (Fight/Flee/Heal)");
+                action = Console.ReadLine();
+                if (action == "Fight" || action == "fight")
                 {
-                    //Player deafat
-                    Console.WriteLine(playerName + " was deafted...");
-                    return false;
+
+                    survive = Fight(ref monsterHealth, ref monsterDamage);
+                    if (!survive)
+                    {
+                        return false;
+                    }
                 }
 
-                //player attack
-                Console.WriteLine(playerName + " attacks! The monster is defeated!");
-                    count++;
-            }
 
-            else if (action == "Flee" || action == "flee")
-            {
-                //escape
-                Console.WriteLine(playerName + " got away safely...");
-                    count++;
-            }
+                else if (action == "Flee" || action == "flee")
+                {
 
-            else
-            {
-                Console.WriteLine("Invalid");
+                    survive = Flee();
+                    if (survive)
+                    {
+                        return true;
+                    }
+
+                }
+
+                else if (action == "Heal" || action == "heal")
+                {
+
+                    survive = Heal(ref monsterHealth, ref monsterDamage);
+                    if (!survive)
+                    {
+                        return false;
+                    }
+
+                }
+
+                else
+                {
+                    //no action
+                    Console.WriteLine("Invalid");
                     Console.ReadLine();
+                    continue;
+                }
+
+            }
+            return survive;
+        }
+        bool Fight(ref int monsterHealth, ref int monsterDamage)
+        {
+            {
+                //player attack
+                Console.WriteLine(playerName + " attacks! The monster takes " + playerDamage + " damage!");
+                monsterHealth -= playerDamage;
+                Console.WriteLine("The monster has " + monsterHealth + " health remaining.");
+
+                if (monsterHealth <= 0)
+                {
+                    //Monster defeat
+                    Console.WriteLine(playerName + " defeated the monster!");
+                    return true;
+                }
+            }
+
+            //monster attack
+            Console.WriteLine("The monster attacks " + playerName + " takes " + monsterDamage + " damage!");
+            playerHealth = playerHealth - monsterDamage;
+            Console.WriteLine(playerName + " Has " + playerHealth + " points of health remaining.");
+            if (playerHealth <= 0)
+            {
+                //Player deafat
+                Console.WriteLine(playerName + " was deafted...");
+                return false;
             }
             return true;
         }
-        
+
+
+        bool Flee()
+        {
+            //escape
+            Console.WriteLine(playerName + " got away safely...");
+            return true;
+        }
+
+        bool Heal(ref int monsterHealth, ref int monsterDamage)
+        {
+            {
+                //player heal
+                Console.WriteLine(playerName + " drinks a vulnerary. " + playerName + " recovers " + playerHealing + " health.");
+                playerHealth += playerHealing;
+
+                if (playerHealth > playerMaxHealth)
+                {
+                    playerHealth = playerMaxHealth;
+                }
+
+                Console.WriteLine("The player has " + playerHealth + " health remaining.");
+            }
+
+            //monster attack
+            Console.WriteLine("The monster attacks " + playerName + " takes " + monsterDamage + " damage!");
+            playerHealth = playerHealth - monsterDamage;
+            Console.WriteLine(playerName + " Has " + playerHealth + " points of health remaining.");
+            if (playerHealth <= 0)
+            {
+                //Player deafat
+                Console.WriteLine(playerName + " was deafted...");
+                return false;
+            }
+            return true;
+        }
+
+
+
+
 
     }
 }
